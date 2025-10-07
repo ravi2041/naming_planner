@@ -1,0 +1,128 @@
+{
+  "campaign_planner": {
+    "name": "Campaign Naming Rules",
+    "description": "Standard naming convention for all campaign identifiers across platforms.",
+    "format_order": [
+      "Advertiser",
+      "PlanNumber",
+      "Product",
+      "Objective",
+      "Campaign",
+      "Month",
+      "Year"
+    ],
+    "examples": [
+      "PM_1001_SAREE_SALES_DIWALIFESTIVALS_OCT_2025",
+      "PM_2002_KURTI_AWAR_NEWARRIVALS_NOV_2025"
+    ],
+    "validation": {
+      "use_underscores": true,
+      "force_uppercase": true,
+      "capitalize_each_token": true,
+      "no_spaces_allowed": true,
+      "month_required": true,
+      "year_required": true,
+      "allowed_objectives": ["AWAR", "SALES", "LEADS"]
+    },
+    "notes": [
+      "Always start with Advertiser short code (e.g., PM).",
+      "Use underscores (_) as separators.",
+      "All campaign names must be in UPPERCASE.",
+      "No spaces or special characters allowed.",
+      "Follow the exact order specified in 'format_order'.",
+      "Month should be a three-letter abbreviation (JAN–DEC).",
+      "Year should be four digits."
+    ],
+    "fields": [
+      { "key": "advertiser", "label": "Advertiser", "example": "PACIFIC MART (PM)", "required": true },
+      { "key": "plan_number", "label": "Plan Number", "example": "1001", "required": true },
+      { "key": "product", "label": "Product", "example": "SAREE", "required": true },
+      { "key": "objective", "label": "Objective", "allowed_values": ["AWAR", "SALES", "LEADS"], "required": true },
+      { "key": "campaign_name", "label": "Campaign Name", "example": "DIWALIFESTIVALS", "required": true },
+      { "key": "month", "label": "Month", "example": "OCT", "required": true },
+      { "key": "year", "label": "Year", "example": "2025", "required": true },
+      { "key": "free_form_text", "label": "Additional Notes / Free Text", "example": "ANY CUSTOM NAMING EXTENSION", "repeatable": true, "required": false }
+    ]
+  },
+
+  "placement_planner": {
+    "name": "Placement / Media Buy Naming Rules",
+    "description": "Standard naming convention for placements or media buys.",
+    "format_order": [
+      "Advertiser",
+      "PlanNumber",
+      "StrategyTactic",
+      "Publisher",
+      "Site",
+      "MediaType",
+      "TargetAudience",
+      "SizeFormatDuration"
+    ],
+    "examples": [
+      "PM_1001_CONS_OMD_YTB_VID_AP25-54_1080X720_30S",
+      "PM_2002_CONV_GROUPM_META_DIS_AP18-45_1080X1080_15S"
+    ],
+    "validation": {
+      "use_underscores": true,
+      "force_uppercase": true,
+      "no_spaces_allowed": true,
+      "publisher_required": true,
+      "target_audience_required": true
+    },
+    "notes": [
+      "Start with Advertiser code and Plan number.",
+      "Publisher and Site fields should reflect actual media owner and platform.",
+      "All placement names must be in UPPERCASE.",
+      "Separate all tokens with underscores.",
+      "Avoid spaces and special characters.",
+      "Maintain consistent abbreviations (e.g., YTB for YouTube, META for Facebook)."
+    ],
+    "fields": [
+      { "key": "advertiser", "label": "Advertiser", "example": "PM", "required": true },
+      { "key": "plan_number", "label": "Plan Number", "example": "1001", "required": true },
+      { "key": "strategy_tactic", "label": "Strategy / Tactic", "allowed_values": ["CONS", "CONV", "AWAR"], "required": true },
+      { "key": "publisher", "label": "Publisher / Media Agency Name", "example": "OMD", "required": true },
+      { "key": "site", "label": "Site / Platform", "allowed_values": ["YTB", "META", "TIKTOK", "DV360", "CM360"], "required": true },
+      { "key": "media_type", "label": "Media Type", "allowed_values": ["VID", "DIS"], "required": true },
+      { "key": "target_audience", "label": "Target Audience", "example": "AP25-54", "required": true },
+      { "key": "size_format_duration", "label": "Size / Format / Duration", "example": "1080X720, 30 SEC", "required": false },
+      { "key": "free_form_text", "label": "Additional Free Form Text", "example": "ANY NOTES OR NAMING EXTENSION", "repeatable": true, "required": false }
+    ]
+  },
+
+  "creative_planner": {
+    "name": "Creative Naming Rules",
+    "description": "Standard naming convention for all creative assets across channels.",
+    "format_order": [
+      "Advertiser",
+      "PlanNumber",
+      "MediaType",
+      "SizeFormatDuration",
+      "CreativeMessage"
+    ],
+    "examples": [
+      "PM_1001_SOC_1080X1080_15S_FESTIVEOFFER",
+      "PM_2002_VOD_1920X1080_30S_NEWCOLLECTION"
+    ],
+    "validation": {
+      "use_underscores": true,
+      "force_uppercase": true,
+      "no_spaces_allowed": true,
+      "media_type_required": true
+    },
+    "notes": [
+      "Creative name must be concise but descriptive.",
+      "Include media type and format size for version control.",
+      "All creative names must be in UPPERCASE.",
+      "Avoid using special characters or spaces.",
+      "Creative message should summarize the theme (e.g., FESTIVEOFFER, NEWCOLLECTION)."
+    ],
+    "fields": [
+      { "key": "advertiser", "label": "Advertiser", "example": "PM", "required": true },
+      { "key": "plan_number", "label": "Plan Number", "example": "1001", "required": true },
+      { "key": "media_type", "label": "Media Type", "allowed_values": ["DIS", "VOD", "SOC"], "required": true },
+      { "key": "size_format_duration", "label": "Size / Format / Duration", "example": "1080X1080, 15 SEC", "required": false },
+      { "key": "free_form_text", "label": "Free Form Text / Creative Message", "example": "FESTIVEOFFER", "repeatable": true, "required": false }
+    ]
+  }
+}

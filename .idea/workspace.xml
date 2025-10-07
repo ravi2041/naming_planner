@@ -5,24 +5,34 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a1e19e72-a73f-49f6-825b-30ec4b9bc8ed" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/naming_planner.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/ai/generate_name_chain.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/ai/recommend_fix_chain.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/ai/validate_name_chain.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/dashboards/campaign_planner.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/dashboards/creative_planner.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/dashboards/placement_planner.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/dashboards/validator.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/utils/db_manager.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/utils/fuzzy_matcher.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/utils/name_generator.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/utils/name_validator.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/naming_panner.db" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/ai/generate_placement_name_node.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/ai/graph_state.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/ai/recommend_fix_node.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/ai/run_langgraph_validator.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/ai/validate_creative_name_node.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/ai/validate_name_node.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/ai/validate_placement_name_node.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/config/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/config/campaign_rules.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/dashboards/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/naming_planner.db" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/utils/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/utils/config_loader.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/utils/json_parser.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipfile" beforeDir="false" afterPath="$PROJECT_DIR$/Pipfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Pipfile.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/ai/generate_name_chain.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/ai/recommend_fix_chain.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/ai/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/ai/validate_name_chain.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/ai/generate_creative_name_node.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/dashboards/campaign_planner.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/dashboards/campaign_planner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/dashboards/creative_planner.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/dashboards/creative_planner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/dashboards/placement_planner.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/dashboards/placement_planner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/utils/db_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utils/db_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/utils/fuzzy_matcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utils/fuzzy_matcher.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/naming_panner.db" beforeDir="false" afterPath="$PROJECT_DIR$/app/ai/generate_name_node.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,6 +49,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "ravi2041"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/ravi2041/naming_planner.git",
+    "accountId": "73e2b04b-bd1b-4304-8d53-db0b129dfb4a"
+  }
+}]]></component>
   <component name="ProjectColorInfo"><![CDATA[{
   "associatedIndex": 1
 }]]></component>
@@ -53,13 +75,19 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.db_manager.executor": "Run",
     "Python.main.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "main",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\naming_planner\app" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -76,16 +104,5 @@
       <updated>1759625039187</updated>
     </task>
     <servers />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/main.py</url>
-          <line>18</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
