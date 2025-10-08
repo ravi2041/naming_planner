@@ -2,22 +2,26 @@
 import os
 from datetime import datetime, timezone
 
+import os
 import boto3
 from botocore.exceptions import ClientError
 
-# If you prefer using Streamlit secrets:
 try:
     import streamlit as st
-    _SECRETS = getattr(st, "secrets", {})
+    _SECRETS = dict(st.secrets)
 except Exception:
     _SECRETS = {}
 
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", _SECRETS.get("AWS_ACCESS_KEY_ID"))
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", _SECRETS.get("AWS_SECRET_ACCESS_KEY"))
-AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION", _SECRETS.get("AWS_DEFAULT_REGION", "ap-southeast-2"))
-DDB_TABLE_NAME = os.getenv("DDB_TABLE_NAME", _SECRETS.get("DDB_TABLE_NAME", "marketing_planner"))
+# --- Credential loading fallback chain ---
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID") or _SECRETS.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY") or _SECRETS.get("AWS_SECRET_ACCESS_KEY")
+AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION") or _SECRETS.get("AWS_DEFAULT_REGION", "ap-southeast-2")
+DDB_TABLE_NAME = os.getenv("DDB_TABLE_NAME") or _SECRETS.get("DDB_TABLE_NAME", "marketing_names")
 
-# -------- Dynamo bootstrap --------
+# --- Create boto3 session explicitly ---
+if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY:
+    raise ValueError("❌ Missing AWS credentials. Please set them in Streamlit secrets or environment variables.")
+
 _session = boto3.session.Session(
     aws_access_key_id=AWS_ACCESS_KEY_ID,
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
@@ -25,6 +29,7 @@ _session = boto3.session.Session(
 )
 _dynamodb = _session.resource("dynamodb")
 _ddb_client = _session.client("dynamodb")
+
 
 
 def _table_exists(table_name: str) -> bool:
