@@ -1,5 +1,5 @@
 # app/utils/config_loader.py
-import json
+import json, os
 from pathlib import Path
 
 MYSQL_CONFIG = {
@@ -9,6 +9,8 @@ MYSQL_CONFIG = {
     "database": "naming_planner"
 }
 
+AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION", "ap-southeast-2")
+DDB_TABLE_NAME = os.getenv("DDB_TABLE_NAME", "marketing_names")
 
 def load_rules(file_name: str):
     """Load JSON rule configuration from app/config folder."""

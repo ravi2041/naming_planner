@@ -1,109 +1,169 @@
 # app/utils/db_manager.py
-import mysql.connector
-from mysql.connector import Error
-from app.utils.config_loader import MYSQL_CONFIG
+import os
+from datetime import datetime, timezone
+
+import boto3
+from botocore.exceptions import ClientError
+
+# If you prefer using Streamlit secrets:
+try:
+    import streamlit as st
+    _SECRETS = getattr(st, "secrets", {})
+except Exception:
+    _SECRETS = {}
+
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", _SECRETS.get("AWS_ACCESS_KEY_ID"))
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", _SECRETS.get("AWS_SECRET_ACCESS_KEY"))
+AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION", _SECRETS.get("AWS_DEFAULT_REGION", "ap-southeast-2"))
+DDB_TABLE_NAME = os.getenv("DDB_TABLE_NAME", _SECRETS.get("DDB_TABLE_NAME", "marketing_planner"))
+
+# -------- Dynamo bootstrap --------
+_session = boto3.session.Session(
+    aws_access_key_id=AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+    region_name=AWS_DEFAULT_REGION,
+)
+_dynamodb = _session.resource("dynamodb")
+_ddb_client = _session.client("dynamodb")
 
 
-def get_connection():
-    """Establish a MySQL connection using config."""
+def _table_exists(table_name: str) -> bool:
     try:
-        conn = mysql.connector.connect(**MYSQL_CONFIG)
-        return conn
-    except Error as e:
-        print(f"❌ MySQL Connection Error: {e}")
-        raise
+        _ddb_client.describe_table(TableName=table_name)
+        return True
+    except _ddb_client.exceptions.ResourceNotFoundException:
+        return False
 
 
 def init_db():
-    """Initialize MySQL table if it doesn't exist."""
-    conn = get_connection()
-    cur = conn.cursor()
+    """
+    Create the DynamoDB table with a GSI if it doesn't exist.
+    - PK: name (S)
+    - GSI: by_planner_type (planner_type as HASH)
+    Billing: PAY_PER_REQUEST
+    """
+    if _table_exists(DDB_TABLE_NAME):
+        return
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS marketing_names (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        planner_type VARCHAR(50) NOT NULL,
-        plan_number VARCHAR(50),
-        name VARCHAR(255) UNIQUE,
-        advertiser VARCHAR(100),
-        product VARCHAR(100),
-        objective VARCHAR(50),
-        campaign VARCHAR(255),
-        month VARCHAR(20),
-        year VARCHAR(10),
-        strategy_tactic VARCHAR(100),
-        publisher VARCHAR(100),
-        site VARCHAR(100),
-        media_type VARCHAR(50),
-        targeting VARCHAR(255),
-        size_format VARCHAR(100),
-        creative_message TEXT,
-        free_form TEXT,
-        source VARCHAR(50),
-        validation_status VARCHAR(50),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    _ddb_client.create_table(
+        TableName=DDB_TABLE_NAME,
+        AttributeDefinitions=[
+            {"AttributeName": "name", "AttributeType": "S"},
+            {"AttributeName": "planner_type", "AttributeType": "S"},  # for GSI
+        ],
+        KeySchema=[
+            {"AttributeName": "name", "KeyType": "HASH"},
+        ],
+        BillingMode="PAY_PER_REQUEST",
+        GlobalSecondaryIndexes=[
+            {
+                "IndexName": "by_planner_type",
+                "KeySchema": [{"AttributeName": "planner_type", "KeyType": "HASH"}],
+                "Projection": {"ProjectionType": "ALL"},  # simplest; includes all attrs
+            }
+        ],
+        Tags=[{"Key": "app", "Value": "naming-planner"}],
     )
-    """)
 
-    conn.commit()
-    conn.close()
+    waiter = _ddb_client.get_waiter("table_exists")
+    waiter.wait(TableName=DDB_TABLE_NAME)
+
+
+def _get_table():
+    return _dynamodb.Table(DDB_TABLE_NAME)
 
 
 def insert_name(record: dict):
-    """Insert new name record into MySQL database."""
-    conn = get_connection()
-    cur = conn.cursor()
-
-    query = """
-    INSERT INTO marketing_names (
-        planner_type, plan_number, name, advertiser, product, objective, campaign,
-        month, year, strategy_tactic, publisher, site, media_type, targeting,
-        size_format, creative_message, free_form, source, validation_status
-    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
+    Insert new record, enforcing uniqueness on 'name'.
+    - Uses ConditionExpression to avoid overwriting existing item with same name.
+    """
+    table = _get_table()
+    item = {
+        # Keys
+        "name": record.get("name"),  # PK, must be unique
+        # Attributes (Dynamo is schemaless; store as strings where appropriate)
+        "planner_type": record.get("planner_type"),
+        "plan_number": record.get("plan_number"),
+        "advertiser": record.get("advertiser"),
+        "product": record.get("product"),
+        "objective": record.get("objective"),
+        "campaign": record.get("campaign"),
+        "month": record.get("month"),
+        "year": record.get("year"),
+        "strategy_tactic": record.get("strategy_tactic"),
+        "publisher": record.get("publisher"),
+        "site": record.get("site"),
+        "media_type": record.get("media_type"),
+        "targeting": record.get("targeting"),
+        "size_format": record.get("size_format"),
+        "creative_message": record.get("creative_message"),
+        "free_form": record.get("free_form"),
+        "source": record.get("source"),
+        "validation_status": record.get("validation_status"),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
 
-    values = (
-        record.get("planner_type"),
-        record.get("plan_number"),
-        record.get("name"),
-        record.get("advertiser"),
-        record.get("product"),
-        record.get("objective"),
-        record.get("campaign"),
-        record.get("month"),
-        record.get("year"),
-        record.get("strategy_tactic"),
-        record.get("publisher"),
-        record.get("site"),
-        record.get("media_type"),
-        record.get("targeting"),
-        record.get("size_format"),
-        record.get("creative_message"),
-        record.get("free_form"),
-        record.get("source"),
-        record.get("validation_status")
-    )
+    # Remove None so we don't store empty attributes
+    item = {k: v for k, v in item.items() if v is not None}
+
+    if not item.get("name"):
+        raise ValueError("insert_name() requires 'name' in record")
 
     try:
-        cur.execute(query, values)
-        conn.commit()
-        print(f"✅ Saved '{record.get('name')}' successfully.")
-    except mysql.connector.Error as e:
-        print(f"⚠️ Error inserting record: {e}")
-    finally:
-        conn.close()
+        table.put_item(
+            Item=item,
+            ConditionExpression="attribute_not_exists(#n)",  # uniqueness guard
+            ExpressionAttributeNames={"#n": "name"},
+        )
+        print(f"✅ Saved '{item['name']}' successfully.")
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
+            print(f"⚠️ Record with name '{item['name']}' already exists.")
+        else:
+            print(f"⚠️ Error inserting record: {e}")
+            raise
 
 
 def fetch_all_names(planner_type: str = None):
-    """Fetch all campaign names (optionally filtered by planner type)."""
-    conn = get_connection()
-    cur = conn.cursor()
+    """
+    Fetch list of names.
+    - If planner_type is provided: Query the GSI.
+    - Else: Scan table with projection (only 'name'), paginating until done.
+    """
+    table = _get_table()
 
     if planner_type:
-        cur.execute("SELECT name FROM marketing_names WHERE planner_type = %s", (planner_type,))
-    else:
-        cur.execute("SELECT name FROM marketing_names")
+        # Query via GSI for efficiency
+        from boto3.dynamodb.conditions import Key
 
-    rows = [r[0] for r in cur.fetchall()]
-    conn.close()
-    return rows
+        names = []
+        kwargs = {
+            "IndexName": "by_planner_type",
+            "KeyConditionExpression": Key("planner_type").eq(planner_type),
+            "ProjectionExpression": "#n",
+            "ExpressionAttributeNames": {"#n": "name"},
+        }
+        while True:
+            resp = table.query(**kwargs)
+            names.extend(i["name"] for i in resp.get("Items", []) if "name" in i)
+            if "LastEvaluatedKey" in resp:
+                kwargs["ExclusiveStartKey"] = resp["LastEvaluatedKey"]
+            else:
+                break
+        return names
+
+    # No filter: full table scan with projection
+    names = []
+    kwargs = {
+        "ProjectionExpression": "#n",
+        "ExpressionAttributeNames": {"#n": "name"},
+    }
+    while True:
+        resp = table.scan(**kwargs)
+        names.extend(i["name"] for i in resp.get("Items", []) if "name" in i)
+        if "LastEvaluatedKey" in resp:
+            kwargs["ExclusiveStartKey"] = resp["LastEvaluatedKey"]
+        else:
+            break
+    return names
